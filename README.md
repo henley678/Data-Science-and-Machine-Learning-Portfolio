@@ -1,4 +1,4 @@
-# Obtain-Unemployment-Data
+# Obtain Unemployment Data for states in the U.S.
 
 ## Part I
 ### Obtain the unemployment data for the following states: Indiana, Mississippi, and NewJersey 
