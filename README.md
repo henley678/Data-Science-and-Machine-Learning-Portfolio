@@ -68,3 +68,9 @@
 - Detect factors that impact consumers' purchase intention
 - Feature selection, build models, and compare model performance
 - Predict potential revenue
+
+
+## Fraud Risk Tableau Story 
+- Assess of the kickback fraud red flags
+-	Visualize fraud
+- Build dashboard to tell the story pipeline
