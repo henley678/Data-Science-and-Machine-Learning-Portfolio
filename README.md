@@ -50,3 +50,9 @@
 
 ## Data Mining of Gas Stations in Germany
 - Identify patterns of sales data for gas stations in Germany
+
+
+## Household Energy Consumption in London, UK
+- Identify patterns of household energy consumption in London, UK
+- Visualize patterns
+- Segment household profiles into groups
