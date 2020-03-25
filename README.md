@@ -35,3 +35,6 @@
 ## 10-K Filings
 - Obtain the 10-K filings for the companies (a list of mutual funds and the companies that were dropped from their portfolios)
 
+
+## Web Scraping Quotes
+- Scrape the website with the quote users and the quote
