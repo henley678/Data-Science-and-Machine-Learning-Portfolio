@@ -56,3 +56,6 @@
 - Identify patterns of household energy consumption in London, UK
 - Visualize patterns
 - Segment household profiles into groups
+
+
+## Paper Towel Sales 
