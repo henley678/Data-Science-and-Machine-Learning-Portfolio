@@ -30,3 +30,8 @@
 
 ## Yelp Reviews for A Restaurant
 - Obtains all the reviews for a specific restaurant from Yelp.com
+
+
+## 10-K Filings
+- Obtain the 10-K filings for the companies (a list of mutual funds and the companies that were dropped from their portfolios)
+
