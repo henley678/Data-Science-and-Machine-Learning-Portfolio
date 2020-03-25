@@ -1,0 +1,416 @@
+
+The folder "smart" in the "data" folder contains energy use data for 5,515 households in London, UK. This data was collected by installing a smart meter in each household that continuously records the total energy consumption of the household. The data is recorded at 30 minute intervals, e.g., a value of 0.15 would mean that the houshold used 0.15 kWh in that 30 minute interval (where kWh is kilowatt hour - a measure of energy). 
+
+The raw data is organized into 112 individual csv files where each csv file contains data for (approximately) 50 households. The data is available for one month - January 2013. The data dictionary is 
+
+- LCLid: Household code
+- tstp : Time stamp 
+- energy: Energy consumption
+
+The households are a random sample from London. During the observation period, the households were randomly allocated to two groups: 
+
+- About 20% of the households were subject to a varying energy price scheme called Dynamic Time of Use. The prices were given a day ahead via the smart meter display or text message to mobile phone. Customers were issued High (67.20 pence per kWh), Low (3.99 pence per kWh) or normal (11.76 pence per kWh) price signals and the times of day these applied. The dates/times and the price signal schedule is availaible as part of this dataset. 
+
+- All non-Time of Use customers (about 80%) were on a flat price of 14.228 pence per kWh. 
+
+For privacy reasons the data doesn't contain exact demographic information about the households. Instead the households were allocated into 17 segments (called ACORN groups) - each household belongs to only one of these groups. Information about the housholds is contained in the _information_households.csv_ file:
+
+- LCLid: Household code
+- stdorToU : Is the household in the Dynamic Time of Use ("ToU") group or the fixed price group ("Std")?
+- Acorn: Which segment is household in?
+- Acorn_grouped: A measure of the relative affluence of the household's ACORN group
+- file: Which of the original 112 files was the household contained in?
+
+
+Visualize the aggregate daily energy consumption (total for all households) for the one month time period. Is energy consumption stable throughout the period or would you say there are large fluctuations in daily energy consumption for these 5,515 households?
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+library(lubridate)
+library(forcats)
+library(scales)
+library(ggplot2)
+```
+
+```{r}
+data_path <- 'data/smart/'
+files <- dir(data_path, pattern = '*.*', full.names = T)
+allData <- map_dfr(files, read_csv)
+```
+
+```{r}
+df_A <- allData %>%
+  group_by(day = factor(mday(tstp))) %>%
+  summarise(total = sum(`energy(kWh/hh)`))
+```
+
+```{r}
+ggplot(df_A, aes(x = day, y = total)) + geom_bar(stat = 'identity') +
+  labs(x = 'Day of January',
+       y = 'Total Energy Consumption',
+       title = 'Energy Consumption by Day of Month')
+```
+
+Yes, there are large fluctuations.
+From January 1st  to Januray 11th , energy consumption remains between 60,000 to 70,000 kWh. But suddenly on January 12th, energy consumption increases to more than 70,000 kWh, and on January 19th and 20th energy consumption increases to more than 80,000 kWh. Then beginning from January 21st, energy decreases from about 75,000 kwh to about 60,000 kWh at the end of January. The pattern is at the beginning of January, total energy consumption will remain stable, but when it comes to the middle of January, energy consumption will rise up, then start to decrease until the end of January.
+
+
+Fluctuations in daily energy consumption may be driven by day of the week. Visualize the average total energy consumption for each weekday (i.e., the average total on Mondays, Tuesdays etc.). Is total energy consumption stable throughout the week? How would you explain the pattern you see?
+
+```{r}
+df_B <- allData %>%
+  group_by(wkday = wday(tstp, label = TRUE, abbr = TRUE)) %>%
+  summarise(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num) %>%
+  arrange(wkday)
+```
+
+```{r}
+ggplot(df_B, aes(x = wkday, y = avg)) + geom_bar(stat = 'identity') +
+  labs(x = 'Weekday',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Weekday')
+```
+
+No, total energy consumption is not stable throughout the week. We can see through the graph that on Wednesday, energy consumption is the lowest and starts to increase until Sunday, on which energy consumption will be the highest. Then energy consumption starts to decrease until Wednesday.
+To explain this pattern, we may assume that on weekdays, households do not have many in-home activities. When it comes to weekends, more activities may be taken at home.
+
+
+There is a common belief that energy use differs across days of the week, mainly due to daytime use (the argument stating that consumers tend to be home at night on weekdays but are only home during the day on Saturday and Sunday) Can you find evidence in the data to support this belief?
+
+```{r}
+df_C <- allData %>%
+  group_by(wkday = wday(tstp, label = TRUE, abbr = TRUE), dt = hour(tstp)) %>%
+  summarise(total = sum(`energy(kWh/hh)`)) %>%
+  arrange(dt)
+```
+
+```{r}
+ggplot(df_C, aes(x = dt, y = total)) + 
+  geom_bar(stat = 'identity') +
+  facet_wrap(~wkday, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'Total Energy Consumption',
+       title = 'Total Energy Consumption by Hour per Day')
+```
+
+The common belief is correct. There is an evidence by looking at the graph. On weekdays (Tuesday, Wednesday, and Thursday) at night, there is more energy consumption that implies consumers tend to be home. During the day on Saturday and Sunday at night, there is less energy consumed compared to at night on weekdays (Tuesday, Wednesday, and Thursday) that implies consumers tend to be less staying home.
+
+
+Rather than look at the aggregate consumption, we can also study variation in consumption across households. Let's compare differences in energy consumption for high energy consumption households and low energy consumption households: 
+
+-  Calculate total energy consumption over the month for each household. 
+
+- Then divide the households into deciles based on this monthly total (i.e., create 10 groups with the same number of households in each group where the first group will have the 10% households with the lowest total energy use, the next group will have households with energy use in the 10%-20% range and so on (Hint: **ntile(x,10)** will create 10 equal sized groups based on the size of x). 
+
+- Calculate the average monthly energy consumption within each group (If you have created the groups correctly, the should have (approximately) the same number of households within each group, but the average consumption should be very different.). 
+
+- How big are these differences across groups? Find a way to visualize these differences.
+
+```{r}
+df_D <- allData %>%
+  group_by(LCLid) %>%
+  summarise(total = sum(`energy(kWh/hh)`)) %>%
+  mutate(group = ntile(total, 10))
+```
+
+```{r}
+df_Dnew <- df_D %>%
+  group_by(group) %>%
+  summarise(total_new = sum(total),
+            num = n(),
+            avg = total_new / num)
+```
+
+```{r}
+ggplot(df_Dnew, aes(x = group, y = avg, fill = group)) + geom_bar(stat = 'identity') +
+  labs(x = 'Group',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Group')
+```
+
+```{r}
+ggplot(df_Dnew, aes(x = group, y = avg)) + geom_point(aes(color = group), size = 5) +
+  geom_line(linetype = 'dotted')
+  labs(x = 'Group',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Group')
+```
+
+Before group 7, the differences between adjacent groups are almost the same. Beginning from group 7, the differences start to increase more. The difference between group 9 and group 10 is the biggest. 
+
+
+By definition the groups you created in part D have large differences in average total consumption levels. Do they also have different energy consumption profiles throughout the day? By "consumption profile" we simply mean how consumption is distributed throughout the hours of the day (average consumption at 1am, 2am etc). Are the shapes of these profiles the same for the 10 groups? Visualize these 10 profiles and compare their shapes.  
+
+```{r}
+df_E <- df_D %>%
+  left_join(allData, by ='LCLid') %>%
+  group_by(group, dt = hour(tstp)) %>%
+  summarise(avg = mean(`energy(kWh/hh)`))
+```
+
+```{r}
+ggplot(df_E, aes(x = dt, y = avg)) + 
+  geom_bar(stat = 'identity') +
+  facet_wrap(~group, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Hour in Each Group')
+```
+
+```{r}
+ggplot(df_E, aes(x = dt, y = avg)) + 
+  geom_line() +
+  facet_wrap(~group, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Hour in Each Group')
+```
+
+The shapes of these profiles look similar for the 10 groups but each group has different amount of energy consumption so the y axis will be different.
+
+
+Does average monthly energy consumption vary by ACORN segment? Visualize your result.
+
+```{r}
+dat <- read_csv("data/information_households.csv")
+
+info <- saveRDS(dat, "data/information_households.rds")
+info_new <- readRDS("data/information_households.rds")
+
+df_F <- allData %>%
+  left_join(info_new, by = 'LCLid') %>%
+  group_by(Acorn) %>%
+  summarise(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num) %>%
+  arrange(Acorn)
+```
+
+```{r}
+ggplot(df_F, aes(x = Acorn, y = avg)) + geom_bar(stat = 'identity') +
+  labs(x = 'Acorn Segment',
+       y = 'Average Energy Consumption',
+       title = 'Average Energy Consumption by Acorn Segment')
+```
+
+Yes, average monthly energy consumption varies by ACORN segment.
+
+
+Recall from above that households were randomized into two groups: one that faced varying energy prices (Time of Use or ToU) and one that faced a fixed energy price. The energy prices were listed above. The file *Tariffs.csv* contain which of the three energy price levels (Low, Normal, High) was active at each half hour time period for all of 2013. If for example, it says 'High' on Jan 8 at 1:30am, then all the ToU households paid 67.2 pence per kWh for that half hour period (while the Std households paid their fixed price of 14.228 pence).
+
+Calculate the average (across housholds) monthly energy consumption and energy cost (i.e., spending) for the two groups (ToU and Std). Which group used the least amount of energy and which group had the lowest cost? 
+
+```{r}
+df_G_EC <- allData %>%
+  left_join(info_new, by = 'LCLid') %>%
+  group_by(stdorToU) %>%
+  summarise(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num) %>%
+  arrange(avg)
+
+df_G_EC
+```
+
+```{r}
+dat_Tariffs <- read_csv("data/Tariffs.csv")
+
+Tariffs <- saveRDS(dat_Tariffs, "data/Tariffs.rds")
+Tariffs_new <- readRDS("data/Tariffs.rds")
+Tariffs_new$TariffDateTime <- mdy_hm(Tariffs_new$TariffDateTime)
+```
+
+```{r}
+df_G_C_ToU <- allData %>%
+  left_join(Tariffs_new, by = c('tstp' = 'TariffDateTime')) %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(stdorToU == 'ToU') %>%
+  group_by(LCLid, Tariff) %>%
+  summarize(amt = sum(`energy(kWh/hh)`)) %>%
+  mutate(price = ifelse(Tariff == 'High', 67.20, ifelse(Tariff == 'Low', 3.99, 11.76)),
+         cost = amt * price) 
+  
+df_G_C_ToUnew <- df_G_C_ToU %>%
+  ungroup() %>%
+  summarise(cost = sum(cost)) 
+```
+
+```{r}
+df_G_C_Std <- allData %>%
+  left_join(Tariffs_new, by = c('tstp' = 'TariffDateTime')) %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(stdorToU == 'Std') %>%
+  group_by(LCLid, Tariff) %>%
+  summarize(amt = sum(`energy(kWh/hh)`)) %>%
+  mutate(price = 14.228,
+         cost = amt * price)
+
+df_G_C_Stdnew <- df_G_C_Std %>%
+  ungroup() %>%
+  summarise(cost = sum(cost))
+```
+
+```{r}
+df_G_C_f1 <- rbind(df_G_C_ToUnew, df_G_C_Stdnew) 
+df_G_C_f2 <- add_column(df_G_C_f1, stdorToU = c('ToU', 'Std'))
+
+df_G_C_f2
+```
+
+ToU group used the least amount of energy and Tou Group had the lowest cost.
+
+
+How do the average energy profiles (energy use throughout the hours of the day) differ between the ToU and Std households? In particular, do the ToU households INCREASE their energy use when prices are low and decrease use when prices are high at all hours of the day? Another way of asking this is: Are the ToU households equally price sensitive at all hours of the day? How does this compare to the profile of the Std households?  
+
+```{r}
+df_H_EC <- allData %>%
+  left_join(info_new, by = 'LCLid') %>%
+  group_by(stdorToU, dt = hour(tstp)) %>%
+  summarise(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num)
+```
+
+```{r}
+dat_Tariffs <- read_csv("data/Tariffs.csv")
+
+Tariffs <- saveRDS(dat_Tariffs, "data/Tariffs.rds")
+Tariffs_new <- readRDS("data/Tariffs.rds")
+Tariffs_new$TariffDateTime <- mdy_hm(Tariffs_new$TariffDateTime)
+```
+
+```{r}
+df_H_C_ToU <- allData %>%
+  left_join(Tariffs_new, by = c('tstp' = 'TariffDateTime')) %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(stdorToU == 'ToU') %>%
+  group_by(dt = hour(tstp), Tariff) %>%
+  summarize(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num) 
+```
+
+```{r}
+ggplot(df_H_C_ToU, aes(x = dt, y = avg)) + 
+  geom_bar(stat = 'identity') +
+  facet_wrap(~Tariff, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'ToU Households Average Energy Consumption',
+       title = 'ToU Households Average Energy Consumption by Hour for Price Level')
+```
+
+We can see from the graph, ToU households stop use energy at time between (2:00 - 4:00) and (14:00 - 16:00) when prices are high. But at 17:00, they start to use energy when prices are high that may because they back home and have needs to use energy for making a living. When prices are low, they tend to use more energy during daytime compared to when prices are normal.
+
+
+```{r}
+df_H_C_Std <- allData %>%
+  left_join(Tariffs_new, by = c('tstp' = 'TariffDateTime')) %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(stdorToU == 'Std') %>%
+  group_by(dt = hour(tstp), Tariff) %>%
+  summarize(total = sum(`energy(kWh/hh)`),
+            num = n(),
+            avg = total / num) 
+```
+
+```{r}
+ggplot(df_H_C_Std, aes(x = dt, y = avg)) + 
+  geom_bar(stat = 'identity') +
+  facet_wrap(~Tariff, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'Std Households Average Energy Consumption',
+       title = 'Std Households Average Energy Consumption by Hour for Price Level')
+```
+
+Std households have the similar pattern that they stop use energy at time between (2:00 - 4:00) and (14:00 - 16:00). But at 17:00, they start to use energy that may because they back home and have needs to use energy for making a living. Graphs for prices are low and prices are normal look similar.
+
+
+```{r}
+ggplot() + 
+geom_line(data=df_H_C_ToU, aes(x = dt, y = avg), color='blue') + 
+geom_line(data=df_H_C_Std, aes(x = dt, y = avg), color='red') +
+facet_wrap(~Tariff, nrow = 1) +
+  labs(x = 'Hour',
+       y = 'Households Average Energy Consumption',
+       title = 'ToU / Std Households Average Energy Consumption Comparison by Hour for Price Level')
+```
+
+By generating the finalized graph, when prices are high, ToU households tend to use less energy consumption than Std households.
+
+When prices are low, ToU households tend to use less energy between mid night and morning than Std households, then tend to use more energy during daytime than Std households, and use about the same amount of energy at night as Std households.
+
+When prices are normal, in general, ToU households use less energy than Std households.
+
+
+The *Acorn_grouped* variable in the _information_households.csv_ is a rough measure of a household's income level ('Adversity', 'Comfortable' and 'Affluent'). Each household belongs to one of these three categories (you may ignore the values 'ACORN-' and 'ACORN-U' here - you can just drop those households for this question). Would you say that income groups have very different energy consumption based on this classification? 
+</span>
+
+```{r}
+df_I <- allData %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(Acorn_grouped == 'Adversity' | Acorn_grouped == 'Comfortable' | Acorn_grouped == 'Affluent') %>%
+  group_by(Acorn_grouped) %>%
+  summarise(total = sum(`energy(kWh/hh)`)) %>%
+  arrange(total)
+```
+
+```{r}
+ggplot(df_I, aes(x = Acorn_grouped, y = total)) + 
+  geom_bar(stat = 'identity') +
+  labs(x = 'Acorn Income Group',
+       y = 'Total Energy Consumption',
+       title = 'Total Energy Consumption by Acorn Income Group')
+```
+
+Yes, income groups have very different energy consumption based on this classfication. To be specific, 'Adversity' group and 'Comfortable' group have similar energy consumption. But 'Adversity' group and 'Affluent' group / 'Comfortable' group and 'Affluent' group have very different energy consumption.
+
+
+Suppose we wanted a more precise statistic on how household income impacts energy use than the rough classification above. Ideally, if we had each household's income level, we could get this by simply averaging consumption for each income level. The problem is that the data doesn't contain exact household demographic information (for privacy reasons). However, we can get measures of demographics within each of the ACORN groups. The file *acornInc.csv* contains information on the income distribution within each ACORN group. The values are interpreted as follows: the value 304 for the ACORN-A group for income category 80K-100K means that compared to the average household in the UK, ACORN-A households are 3.04 times as likely to belong to this income category. Using this information, provide an estimate for the average monthly energy consumption for each income group. Do you get something radically different than in part H? (as above you may drop the ACORN-U households for this question)
+
+```{r}
+dat_acorninc <- read_csv("data/acornInc.csv")
+
+acorninc <- saveRDS(dat_acorninc, "data/acorninc.rds")
+acorninc_new <- readRDS("data/acorninc.rds")
+```
+
+```{r}
+df_J1 <- acorninc_new %>%
+  gather(`ACORN-A`:`ACORN-Q`, key = "group", value = 'number') %>%
+  group_by(group) %>%
+  mutate(total_num = sum(number),
+         prob = number / total_num)
+```
+
+```{r}
+df_J2 <- allData %>%
+  left_join(info_new, by = 'LCLid') %>%
+  filter(Acorn != 'ACORN-' & Acorn != 'ACORN-U') %>%
+  group_by(Acorn) %>%
+  summarise(total_cp = sum(`energy(kWh/hh)`)) %>%
+  arrange(Acorn)
+```
+
+```{r}
+df_J2_new <- df_J2 %>%
+  left_join(df_J1, by = c('Acorn' = 'group')) %>%
+  mutate(cp_wt = prob * total_cp) %>%
+  group_by(REFERENCE) %>%
+  summarise(total_cp = sum(cp_wt))
+```
+
+```{r}
+ggplot(df_J2_new, aes(x = REFERENCE, y = total_cp)) + 
+  geom_bar(stat = 'identity') +
+  labs(x = 'Income Level',
+       y = 'Total Energy Consumption',
+       title = 'Total Energy Consumption by Income Level')
+```
+
+Yes, something is radically different. From the graph, it implies that as income level increases, average monthly energy consumption tends to decrease. Acorn group with income level 100,000 +, has the lowest average monthly energy consumption.
+
