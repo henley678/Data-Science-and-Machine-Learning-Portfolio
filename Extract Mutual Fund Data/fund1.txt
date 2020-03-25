@@ -1,0 +1,109 @@
+issue_date is: 2013-05-06
+mutual_fund_name: Adirondack_Funds
+Name of Issuer             Class     CUSIP No.      Market       Quantity  Investment  Other    Voting   Authority
+                                                             Value                 Discretion Managers   Sole     Shared    None
+ABBOTT LABS                    COM           002824100 $             241     6,825 Sole       None                          6,825
+ABBVIE INC                     COM           00287Y109 $             278     6,825 Sole       None                          6,825
+AERCAP HOLDINGS NV             SHS           N00985106  $          1,326    85,810 Sole       None        85,810
+AEROPOSTALE                    COM           007865108 $             925    67,987 Sole       None        67,987
+ALBANY MOLECULAR RESH INC      COM           012423109  $          1,199   114,083 Sole       None       114,083
+ALCATEL-LUCENT                 SPONSORED ADR 013904305 $             588   441,740 Sole       None       441,740
+ALLSCRIPTS HEALTHCARE SOLUTN   COM           01988P108  $          2,592   190,749 Sole       None       190,749
+ALTEVA                         COM           02153V102 $             201    21,875 Sole       None                         21,875
+ASSURED GUARANTY LTD           COM           G0585R106  $          1,847    89,600 Sole       None        89,600
+AT&T INC                       COM           00206R102 $             512    13,950 Sole       None                         13,950
+AUTOBYTEL INC                  COM NEW       05275N205  $          1,156   266,423 Sole       None       266,423
+AXT INC                        COM           00246W103 $             850   288,999 Sole       None       288,999
+BEBE STORES INC                COM           075571109  $          1,275   305,808 Sole       None       305,808
+BENCHMARK ELECTRS INC          COM           08160H101  $          1,501    83,288 Sole       None        83,288
+BOSTON SCIENTIFIC CORP         COM           101137107 $             520    66,525 Sole       None                         66,525
+BOULDER BRANDS INC             COM           101405108  $          1,272   141,450 Sole       None       141,450
+BROADRIDGE FINL SOLUTIONS IN   COM           11133T103  $          1,644    66,200 Sole       None        66,200
+BROCADE COMMUNICATIONS SYS I   COM NEW       111621306  $          2,345   406,400 Sole       None       406,400
+BROOKLINE BANCORP INC DEL      COM           11373M107  $          1,843   201,674 Sole       None       201,674
+CAL MAINE FOODS INC            COM NEW       128030202 $             740    17,398 Sole       None        17,398
+CALLAWAY GOLF CO               COM           131193104  $          2,295   346,608 Sole       None       346,608
+CHRISTOPHER & BANKS CORP       COM           171046105 $             663   103,163 Sole       None       103,163
+CNO FINL GROUP INC             COM           12621E103  $          3,028   264,478 Sole       None       264,478
+COCA COLA BOTTLING CO CONS     COM           191098102  $          1,924    31,895 Sole       None        31,895
+COCA COLA ENTERPRISES INC NE   COM           19122T109 $             500    13,550 Sole       None                         13,550
+COEUR D ALENE MINES CORP IDA   COM NEW       192108504  $          1,043    55,291 Sole       None        55,291
+COMVERSE INC                   COM           20585P105 $             964    34,368 Sole       None        34,368
+CONSOLIDATED EDISON INC        COM           209115104 $             311     5,100 Sole       None                          5,100
+COSI INC                       COM           22122P101 $             560   811,498 Sole       None       811,498
+COVANTA HLDG CORP              COM           22282E102  $          1,499    74,400 Sole       None        74,400
+COWEN GROUP INC NEW            CL A          223622101  $          1,769   627,160 Sole       None       627,160
+CRYOLIFE INC                   COM           228903100  $          1,414   235,288 Sole       None       235,288
+CTS CORP                       COM           126501105  $          1,966   188,312 Sole       None       188,312
+DOLE FOOD CO INC NEW           COM           256603101  $          1,820   166,940 Sole       None       166,940
+DYNEGY INC NEW                 COM           26817R108  $          1,264    52,708 Sole       None        52,708
+ELECTRO SCIENTIFIC INDS        COM           285229100 $             737    66,723 Sole       None        66,723
+EMCOR GROUP INC                COM           29084Q100  $          2,731    64,434 Sole       None        64,434
+EMULEX CORP                    COM NEW       292475209  $          1,333   204,207 Sole       None       204,207
+ENDURANCE SPECIALTY HLDGS LT   SHS           G30397106  $          2,116    44,258 Sole       None        44,258
+EXELON CORP                    COM           30161N101 $             506    14,680 Sole       None                         14,680
+EXPRESS INC                    COM           30219E103 $             763    42,860 Sole       None        42,860
+FIRSTMERIT CORP                COM           337915102  $          2,303   139,243 Sole       None       139,243
+FRESH DEL MONTE PRODUCE INC    ORD           G36738105  $          1,560    57,836 Sole       None        57,836
+GAIAM INC                      CL A          36268Q103  $          1,115   265,370 Sole       None       265,370
+GENERAL ELECTRIC CO            COM           369604103 $             401    17,325 Sole       None                         17,325
+GENWORTH FINL INC COM          COM CL A      37247D106  $          3,193   319,300 Sole       None       252,600           66,700
+GFI GROUP INC                  COM           361652209 $             119    35,603 Sole       None        34,853              750
+GLOBAL POWER EQUIPMENT GRP I   COM PAR $0.01 37941P306  $          2,406   136,566 Sole       None       136,566
+HARDINGE INC                   COM           412324303  $          1,356    99,510 Sole       None        99,510
+HARTFORD FINL SVCS GROUP INC   COM           416515104 $             561    21,725 Sole       None                         21,725
+HOOPER HOLMES INC              COM           439104100 $             892 1,939,156 Sole       None     1,939,156
+HUNTSMAN CORP                  COM           447011107 $             520    27,950 Sole       None                         27,950
+IAC INTERACTIVECORP            COM PAR $.001 44919P508  $          2,046    45,799 Sole       None        45,799
+INTRALINKS HLDGS INC           COM           46118H104  $          1,701   267,377 Sole       None       267,377
+IPASS INC                      COM           46261V108  $          1,270   641,245 Sole       None       641,245
+JANUS CAP GROUP INC            COM           47102X105  $          2,206   234,668 Sole       None       234,668
+JOHNSON & JOHNSON              COM           478160104 $             204     2,500 Sole       None                          2,500
+JOURNAL COMMUNICATIONS INC     CL A          481130102  $          2,786   414,619 Sole       None       414,619
+KEYNOTE SYS INC                COM           493308100  $          1,108    79,395 Sole       None        79,395
+KROGER CO                      COM           501044101 $             316     9,525 Sole       None                          9,525
+LSI INDS INC                   COM           50216C108  $          1,793   256,891 Sole       None       256,891
+MATRIX SVC CO                  COM           576853105  $          1,181    79,282 Sole       None        79,282
+METLIFE INC                    COM           59156R108 $             490    12,900 Sole       None                         12,900
+MICROSOFT CORP                 COM           594918104 $             256     8,960 Sole       None                          8,960
+MONDELEZ INTL INC              CL A          609207105 $             256     8,350 Sole       None                          8,350
+MONTPELIER RE HOLDINGS LTD     SHS           G62185106  $          1,500    57,600 Sole       None        57,600
+MORGAN STANLEY                 COM NEW       617446448 $             404    18,375 Sole       None                         18,375
+MYERS INDS INC                 COM           628464109 $             616    44,108 Sole       None        44,108
+NISOURCE INC                   COM           65473P105 $             431    14,700 Sole       None                         14,700
+NN INC                         COM           629337106  $          1,188   125,571 Sole       None       125,571
+OMEGA PROTEIN CORP             COM           68210P107  $          2,105   195,806 Sole       None       195,806
+OWENS & MINOR INC NEW          COM           690732102  $          2,414    74,151 Sole       None        74,151
+PAN AMERICAN SILVER CORP       COM           697900108 $             907    55,400 Sole       None        55,400
+PFIZER INC                     COM           717081103 $             324    11,230 Sole       None                         11,230
+PHOENIX COS INC NEW            COM NEW       71902E604  $          1,242    40,358 Sole       None        40,358
+PNM RES INC                    COM           69349H107 $             558    23,939 Sole       None        23,939
+PRGX GLOBAL INC                COM NEW       69357C503  $          1,280   184,127 Sole       None       184,127
+REAL GOODS SOLAR INC           CL A          75601N104 $             114    63,300 Sole       None                         63,300
+REALNETWORKS INC               COM NEW       75605L708 $             943   122,332 Sole       None       120,333            1,999
+SANMINA CORPORATION            COM           801056102  $          1,933   169,989 Sole       None       169,989
+SEABOARD CORP                  COM           811543107  $          2,114       755 Sole       None           755
+SEACHANGE INTL INC             COM           811699107  $          2,137   179,724 Sole       None       179,724
+SELECTIVE INS GROUP INC        COM           816300107  $          1,728    71,984 Sole       None        71,984
+SPRINT NEXTEL CORP             COM SER 1     852061100 $             259    41,700 Sole       None                         41,700
+STEWART INFORMATION SVCS COR   COM           860372101  $          2,431    95,464 Sole       None        95,464
+TELLABS INC                    COM           879664100 $             168    80,171 Sole       None        80,171
+TETRA TECHNOLOGIES INC DEL     COM           88162F105  $          2,398   233,686 Sole       None       233,686
+TRINITY BIOTECH PLC            SPON ADR NEW  896438306  $          2,726   161,507 Sole       None       161,507
+TRIQUINT SEMICONDUCTOR INC     COM           89674K103 $             924   182,575 Sole       None       182,575
+TRUSTCO BK CORP N Y            COM           898349105 $             339    60,750 Sole       None                         60,750
+UNS ENERGY CORP                COM           903119105  $          2,569    52,500 Sole       None        52,500
+VASCULAR SOLUTIONS INC         COM           92231M109 $             891    54,917 Sole       None        54,917
+VISHAY INTERTECHNOLOGY INC COM COM           928298108  $          1,360    99,900 Sole       None        99,900
+VISTEON CORP                   COM NEW       92839U206  $          2,036    35,288 Sole       None        35,288
+XEROX CORP                     COM           984121103 $             431    50,100 Sole       None                         50,100
+YAHOO INC                      COM           984332106 $             760    32,300 Sole       None                         32,300
+
+
+                                                          $      121,330
+</TABLE>
+
+
+</TEXT>
+</DOCUMENT>
+</SEC-DOCUMENT>
