@@ -38,3 +38,7 @@
 
 ## Web Scraping Quotes
 - Scrape the website with the quote users and the quote
+
+
+## Marketing Mix
+- Create a marketing mix model to estimate the impact of advertising on consumers' brand quality attitudes
