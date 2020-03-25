@@ -62,3 +62,9 @@
 - Identify patterns of paper towel sales in grocery stores
 - Visualize patterns
 - Develop models to predict sales of brands in the given time windows and markets 
+
+
+## Online Purchase Intention
+- Detect factors that impact consumers' purchase intention
+- Feature selection, build models, and compare model performance
+- Predict potential revenue
