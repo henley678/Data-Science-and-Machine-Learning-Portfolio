@@ -42,3 +42,7 @@
 
 ## Marketing Mix
 - Create a marketing mix model to estimate the impact of advertising on consumers' brand quality attitudes
+
+
+## Books to Scrape
+- Scrape a section of website books.toscrape.com 
