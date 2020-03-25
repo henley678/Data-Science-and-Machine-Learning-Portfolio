@@ -59,3 +59,6 @@
 
 
 ## Paper Towel Sales 
+- Identify patterns of paper towel sales in grocery stores
+- Visualize patterns
+- Develop models to predict sales of brands in the given time windows and markets 
