@@ -29,4 +29,4 @@
 
 
 ## Yelp Reviews for A Restaurant
-
+- Obtains all the reviews for a specific restaurant from Yelp.com. 
