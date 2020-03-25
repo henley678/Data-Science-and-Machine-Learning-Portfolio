@@ -14,3 +14,9 @@
 ## Extract Mutual Fund Data
 - Use  Beautiful Soup library for xml files and pandas for text files. 
 - Extract the name of issuer, CUSIP, Quantity of shares,  mutual fund name, and filing report date.
+
+
+## Web Scraping of Twitter Review
+- Use the twitter stream listener from the tweepy library to obtain the most recent 50 tweets about a specific keyword. 
+- Use Microsoft Azure text analytics to obtain the sentiment of each tweet.  
+- Report the average sentiment of all the tweets for that specific keyword.  
