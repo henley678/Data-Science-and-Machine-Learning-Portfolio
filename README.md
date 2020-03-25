@@ -26,3 +26,7 @@
 - Use the twitter stream listener from the tweepy library to obtain the most recent 50 tweets about a specific keyword. 
 - Use Microsoft Azure text analytics to obtain the sentiment of each tweet.  
 - Report the average sentiment of all the tweets for that specific keyword.  
+
+
+## Yelp Reviews for A Restaurant
+
