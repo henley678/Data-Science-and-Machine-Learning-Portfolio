@@ -1,0 +1,66 @@
+```{r}
+library(tidyverse)
+library(rvest)
+
+baseURL <- 'http://books.toscrape.com/catalogue/'
+histURL <- read_html(paste0(baseURL,'category/books/history_32/index.html'))
+```
+
+```{r}
+bookData <- NULL  # initialize an empty data frame
+allBooks <- histURL %>% 
+            html_nodes(".product_pod")
+```
+
+```{r}
+links <- allBooks %>%
+  html_nodes("h3 a") %>%
+  html_attr("href") 
+```
+
+```{r}
+links
+```
+
+```{r}
+links <- paste0(baseURL,substring(links,10))
+```
+
+```{r}
+links
+```
+
+```{r}
+## loop over each book page 
+for (theBook in 1:length(links)){
+  
+  ## read book page 
+  thePage <- read_html(links[theBook])
+  
+  # get book title 
+  theTitle <-  thePage %>%
+               html_nodes(".product_main > h1") %>% html_text()
+  
+  ## get price  
+  thePrice <- thePage %>%
+              html_nodes(".product_main > p.price_color") %>%html_text()
+    
+  ## get book description  
+  theDescr <- thePage %>%
+  html_nodes(".product_page > p") %>%  html_text()
+    
+  ## add book to data frame   
+  bookData <- bind_rows(bookData,
+                        data.frame(title = theTitle, 
+                                   price = thePrice, 
+                                   description = theDescr,
+                                  stringsAsFactors = F)
+                        )
+}
+```
+
+```{r}
+saveRDS(bookData, file = "output.rds")
+my_data_452 <- readRDS("~/Desktop/Books to Scrape/output.rds")
+my_data_452
+```
