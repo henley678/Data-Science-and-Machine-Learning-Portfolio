@@ -1,0 +1,355 @@
+
+The data are one year of sales data for a a large number of grocery stores for products in the paper towel category. There are three data files:
+
+- **sales.rds**:   Each row is data on sales for a (store,week,product) combination. For more information see the salesINFO.txt file.
+
+- **products.rds**: Each row is information on one product (UPC = Universal Product Code. This is a unique bar code for each product). For more information see the productINFO.txt file. 
+
+- **stores.rds**:  Each row is information on one store. For more information see the storesINFO.txt file. Note that you have information of when each store opened (and whether or not it closed during the 52 week period). Note also that some stores close and then reopen later under a different store chain name. Due to this phenomenon there are more rows in the store file than there are stores (i.e., some stores occur twice).   
+
+
+Manufacturers and grocery store managers use data like this to understand preferences for different types of product in category, how these preferences vary over time and location, and how sales can be impacted by marketing strategies such as price promotions.  
+
+
+First look at total sales in dollars for all stores combined. Which week (report the week index WEEK) had the highest sales in dollars and what was the dollars sales that week? 
+
+```{r}
+## load libraries
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+library(lubridate)
+library(forcats)
+library(scales)
+library(ggplot2)
+library(stringr)   
+library(broom)
+```
+
+```{r}
+sales <- read_rds('data/sales.rds')
+stores <- read_rds('data/stores.rds')
+products <- read_rds('data/products.rds')
+```
+
+```{r}
+df1 <- sales %>%
+    group_by(WEEK) %>%
+    summarise(total = sum(DOLLARS)) %>%
+    arrange(desc(total))
+
+head(df1, 1)
+
+print(paste0('WEEK ', df1[1,1], ' had the highest sales in dollars: ', df1[1,2]))
+```
+
+
+A **brand** is made up of multiple products (UPCs). The field L5 in the products file denotes the brand of a UPC. How many UPCs are sold under the brand name "BOUNTY" and how many are sold under the brand name "SCOTT"? (note: consider ONLY brands with the name "BOUNTY" and "SCOTT". For example,  "BOUNTY BASIC" is a different brand from "BOUNTY").
+
+```{r}
+df2_BOUNTY <- products %>%
+    filter(L5 == 'BOUNTY') %>%
+    group_by(UPC) %>%
+    summarise(num_BOUNTY = n()) 
+
+df2_SCOTT <- products %>%
+    filter(L5 == 'SCOTT') %>%
+    group_by(UPC) %>%
+    summarise(num_SCOTT = n()) 
+
+glimpse(df2_BOUNTY)
+glimpse(df2_SCOTT)
+
+print(paste0('444 ', 'UPCs are sold under the brand name “BOUNTY”'))
+print(paste0('85 ', 'UPCs are sold under the brand name “SCOTT”'))
+```
+
+
+What are the five biggest brands of paper towels in terms of dollar sales for the whole year?
+
+```{r}
+df3 <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    group_by(L5) %>%
+    summarise(total = sum(DOLLARS)) %>%
+    arrange(desc(total)) %>%
+    slice(1:5)
+
+df3
+```
+
+
+What are the five biggest brands of paper towels in terms of volume, i.e., amount of paper towel? Note: Different products/UPCs contain different amounts of paper towel, i.e., if you sell one unit of a UPC with 12 rolls of paper towel, you sell more volume than if you sell a unit of a UPC with only 2 rolls of paper towel. The field VOL_EQ in the products file allows you to compute a normalized quantity of volume across products. The bigger VOL_EQ is the more paper towel the product contain. Therefore, you can think of UNITS*VOL_EQ as the sales volume for a product in "standardized" units that you can compare across UPCs. 
+
+```{r}
+df4 <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    group_by(L5) %>%
+    summarise(total.vol = sum(vol)) %>%
+    arrange(desc(total.vol)) %>%
+    slice(1:5)
+
+df4
+```
+
+
+How would explain the fact that Bounty is biggest in dollar sales but "Private Label" is biggest in volume? (a one line answer is enough)
+
+The difference between sales revenue in dollar and sales volume is sales revenue should equal to sales volume multiplies with average price per unit (sales revenue = sales volume * average price per unit). The higher volume a product is sold does not mean it will lead to higher sales revenue in dollar since we do not know the information about average price per unit.
+
+
+EST_ACV in the stores file is a measure of the size of a store, basically a proxy for store sales (in total across all product categories) with bigger EST_ACV implying higher overall store sales. Can you verify this using the paper towel sales data? 
+
+```{r}
+df6 <- stores %>%
+    left_join(sales, by = 'IRI_KEY') %>%
+    group_by(IRI_KEY) %>%
+    summarise(Average_EST_ACV = mean(EST_ACV),
+              Revenue = sum(DOLLARS)) %>%
+    arrange(desc(Average_EST_ACV))
+
+head(df6, 10)
+
+ggplot(data = df6, aes(x = Average_EST_ACV, y = Revenue)) + 
+  geom_point(size = 2) + 
+  geom_line(linetype = 'dotted') + 
+  labs(x = 'Average EST_ACV',
+       y = 'Sales Revenue in Dollar',
+       title = 'Relationship Between Sales Revenue and EST_ACV') 
+```
+
+We can see from the graph, on average, bigger EST_ACV implies higher overall store sales (sale revenue in dollar) as the higher EST_ACV is, the higher dollar amount sales revenue has.
+
+
+What are the top 20 UPCs in terms of volume (where volume again is measured in standardized units (UNITS*VOL_EQ))?
+
+```{r}
+df7 <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    group_by(UPC) %>%
+    summarise(total.vol = sum(vol)) %>%
+    arrange(desc(total.vol)) %>%
+    slice(1:20)
+
+df7
+```
+
+
+What are the five most and five least expensive UPCs among the top 20 you found in Q7? 
+
+- Note: Here you should measure the "expensiveness" of a UPC as the **average price per standardized unit** over all weeks and stores. (Hint: The price of a UPC will change from week to week in a given store and vary between stores within a week. You should calculate the average price that was charged across all units sold of the UPC - taking into account that stores with low prices may sell more units than stores with high prices. For example, if one store sells 250 standardized units at a price of \$1 per standardized unit and another store sells 100 standardized units at \$1.5, then the average price charged across all units sold is NOT 0.5*\$1 + 0.5*\$1.5 = \$1.25 since there were many more units sold at \$1 than at \$1.5)
+
+```{r}
+df8 <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    group_by(UPC) %>%
+    summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) %>%
+    slice(1:20)
+
+head(df8, 5)
+tail(df8, 5)
+```
+
+
+Most marketers believe that big premium national brands use a pricing strategy called HI-LO while private label brands use a strategy called EDLP. Here HI-LO means a high price that occasionally is discounted, while EDLP means "every day low price" (a constant low price). Using the national brands BOUNTY and SCOTT and the PRIVATE LABEL brand, can you find evidence for this claim in this data? Hint: calculate the average price per brand for each week and plot this as a function of week. 
+       
+```{r}
+df9_BOUNTY <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    filter(L5 == 'BOUNTY') %>%
+    group_by(WEEK) %>%
+    summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+df9_SCOTT <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    filter(L5 == 'SCOTT') %>%
+    group_by(WEEK) %>%
+    summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+df9_PRIVATE_LABEL <- sales %>%
+    left_join(products, by = 'UPC') %>%
+    mutate(vol = UNITS * VOL_EQ) %>%
+    filter(L5 == 'PRIVATE LABEL') %>%
+    group_by(WEEK) %>%
+    summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+ggplot() + 
+geom_line(data = df9_BOUNTY, aes(x = WEEK, y = Average_Price), color = 'blue') + 
+geom_line(data = df9_SCOTT, aes(x = WEEK, y = Average_Price), color = 'red') +
+geom_line(data = df9_PRIVATE_LABEL, aes(x = WEEK, y = Average_Price), color = 'green') +
+    labs(x = 'Week',
+       y = 'Average_Price per Brand',
+       title = 'Average Price per Brand in Weeks') 
+```
+
+The evidence for this claim is shown as in the graph.
+
+       
+Some stores close or open during the 52 week period. Create a data frame consisting of the subset of stores that were open throughout the 52 week period (remember the first week of the 52 weeks for which we have sales data is 1583 and the last is 1634) (Hint 1: the store file has information on when each store opened and closed) (Hint 2: You should get a data frame consisting of 1760 stores).
+
+```{r}
+stores_new <- stores %>%
+   filter(between(Open, 0, 1583) & between(Clsd, 1634, 10000))
+
+stores_new
+```
+
+
+Let's investigate how prices vary by market. Each store (IRI_KEY) can be matched to a market (Market_Name) in the stores file. We will focus on the two brands BOUNTY and SCOTT and one the stores that were open in all 52 weeks (what you found in Q10). Calculate the average brand price for BOUNTY and SCOTT in each of the 50 markets. Are markets where BOUNTY is expensive also markets where SCOTT is expensive? 
+
+```{r}
+df11_BOUNTY <- products %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  filter(L5 == 'BOUNTY') %>%
+  group_by(Market_Name) %>%
+  summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+df11_SCOTT <- products %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  filter(L5 == 'SCOTT') %>%
+  group_by(Market_Name) %>%
+  summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+df11_BOUNTY
+df11_SCOTT
+
+ggplot(data = df11_BOUNTY, aes(x = fct_reorder(Market_Name, Average_Price), y = Average_Price)) + 
+  geom_point(size = 2) + 
+  geom_line(linetype = 'dotted') + 
+  labs(x = 'Market',
+       y = 'Average_Price of BOUNTY',
+       title = 'Average Price of BOUNTY in Markets')  
+
+ggplot(data = df11_SCOTT, aes(x = fct_reorder(Market_Name, Average_Price), y = Average_Price)) + 
+  geom_point(size = 2) + 
+  geom_line(linetype = 'dotted') + 
+  labs(x = 'Market',
+       y = 'Average_Price of SCOTT',
+       title = 'Average Price of SCOTT in Markets')  
+```
+
+From the graphs, on average, average brand price of BOUNTY in markets tend to be more expensive.
+
+
+UPCs vary in absorbency level, i.e., how good the product is at soaking up liquids. Do markets prefer different absorbency levels in their paper towl product? To answer this question, calculate the share of each absorbency level out of total sales for each market (where sales is measure in volume of standardized units). You can drop UPCs that have missing absorbency level for this calculation (so the share is out of all UPCs with absorbency level information).
+Create a visualization of absorbency level shares that highlights any potential differences in shares across markets. As above, limit your focus to stores that were open in all 52 weeks.
+
+```{r}
+df12 <- products %>%
+  filter(!`ABSORBENCY LEVEL` == 'MISSING') %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  group_by(Market_Name, `ABSORBENCY LEVEL`) %>%
+  summarise(Volume = sum(vol),
+            num = n(),
+            Share = num / Volume)
+
+df12
+
+ggplot(data = df12, aes(x = fct_reorder(Market_Name, Share), y = Share, color = `ABSORBENCY LEVEL`)) + 
+  geom_point(size = 2) + 
+  geom_line(linetype = 'dotted') + 
+  labs(x = 'Market',
+       y = 'Sales Volume',
+       title = 'Sales Volume in Markets with ABSORBENCY LEVEL') +
+  facet_wrap(~ `ABSORBENCY LEVEL`)
+```
+
+
+Marketers are often interested in "market structure", i.e., which brands compete with which other brands. In this part you are asked to investigate the market structure in the paper towel category. Focus attention only on the brands BOUNTY, SCOTT and PRIVATE LABEL. Then develop a sales model for each brand at the (Market_Name,WEEK) level. This model should predict sales of a brand in a given week and market. So to develop your model you should first aggregate the data up to this level and then generate any other variables that you think might impact demand for a certain brand. 
+
+Start by calculating sales and prices at the (market,week) level for the three brands. So for each (market,week,brand) combination you should calculate total sales volume (in standardized units as above) and the average price (as you did above).
+
+```{r}
+df13_BOUNTY <- products %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  filter(L5 == 'BOUNTY') %>%
+  group_by(Market_Name, WEEK) %>%
+  summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price)) 
+
+df13_SCOTT <- products %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  filter(L5 == 'SCOTT') %>%
+  group_by(Market_Name, WEEK) %>%
+  summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price))
+
+df13_PRIVATE_LABEL <- products %>%
+  left_join(sales, by = 'UPC') %>%
+  mutate(vol = UNITS * VOL_EQ) %>%
+  left_join(stores_new, by = 'IRI_KEY') %>%
+  filter(L5 == 'PRIVATE LABEL') %>%
+  group_by(Market_Name, WEEK) %>%
+  summarise(Revenue = sum(DOLLARS),
+              Volume = sum(vol),
+              Average_Price = Revenue / Volume) %>%
+    arrange(desc(Average_Price))
+
+df13_BOUNTY
+df13_SCOTT
+df13_PRIVATE_LABEL
+```
+
+
+Set-up three predictive models where you predict the sales volume (or log(sales volume)) of each of the three brands (in each week and market) using a set of features that you think might predict sales volume. Note that if you include the price (or log(price)) of each of the three brands as features, then you can see how the price of other brands impact sales of a given brand. This will tell you which brands compete with each other (hint: just use a linear model where you use log prices, market and week. Then look at the estimated weights for log price. You do not need to divide the data into training and validation - just train the model on the full sample).   
+
+```{r}
+## Model: log prices, market and week
+lm.BOUNTY <- lm(Volume ~ log(Average_Price) + Market_Name + WEEK, data = df13_BOUNTY)
+lm.SCOTT <- lm(Volume ~ log(Average_Price) + Market_Name + WEEK, data = df13_SCOTT)
+lm.PRIVATE_LABEL <- lm(Volume ~ log(Average_Price) + Market_Name + WEEK, data = df13_PRIVATE_LABEL)
+
+summary(lm.BOUNTY)
+summary(lm.SCOTT)
+summary(lm.PRIVATE_LABEL)
+```
+
+```{r}
+## show coefficients
+effects_BOUNTY <- select(tidy(lm.BOUNTY),term,estimate)
+effects_SCOTT <- select(tidy(lm.SCOTT),term,estimate)
+effects_PRIVATE_LABEL <- select(tidy(lm.PRIVATE_LABEL),term,estimate)
+
+effects_BOUNTY
+effects_SCOTT
+effects_PRIVATE_LABEL
+```
+
