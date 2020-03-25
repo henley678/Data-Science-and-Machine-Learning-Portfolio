@@ -46,3 +46,7 @@
 
 ## Books to Scrape
 - Scrape a section of website books.toscrape.com 
+
+
+## Data Mining of Gas Stations in Germany
+- Identify patterns of sales data for gas stations in Germany
