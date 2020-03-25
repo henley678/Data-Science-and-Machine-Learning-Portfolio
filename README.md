@@ -12,8 +12,14 @@
 
 
 ## Extract Mutual Fund Data
+### Part I 
 - Use  Beautiful Soup library for xml files and pandas for text files. 
 - Extract the name of issuer, CUSIP, Quantity of shares,  mutual fund name, and filing report date.
+
+## Part II
+- Obtain information from the text file. 
+- Obtain the link to the text files from the attached file (Mutual_Fund_Info_Table_Link.csv)
+- Extract mutual fund info. 
 
 
 ## Web Scraping of Twitter Review
