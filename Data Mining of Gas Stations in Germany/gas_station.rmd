@@ -1,0 +1,161 @@
+The data folder contains observations of selling prices for three different types of gasoline (e5, e10 and diesel) at the hourly level (from 6am to 8pm) for each day for one month for (almost) all gas stations in Germany. There are four data files - one for each gas type and another file with information on each gas station. 
+
+The columns in the gas price data are for the first gas type (e5) are:
+
+- **station_uuid**: a unique code for each gas station
+- **day**: the date 
+- **hour**: hour of day (6 = 6am, 20 = 8pm)
+- **e5**: the price for one liter of gas in Euros  
+
+The columns for the e10 and diesel types follow the same format (only difference is the name of the price column (e10 and disel)).
+
+The columns in the station file are self-explanatory (*brand* is the brand of the station - like Shell or Mobil in California.)
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+
+diesel <- readRDS("data/diesel.rds")
+e10 <- readRDS("data/e10.rds")
+e5 <- readRDS("data/e5.rds")
+
+diesel_new <- gather(diesel, type, price, 4)
+e10_new <- gather(e10, type, price, 4)
+e5_new <- gather(e5, type, price, 4)
+
+df <- rbind(e5_new, e10_new, diesel_new)
+
+glimpse(df)
+```
+
+
+```{r}
+df_2 <- df %>%
+  group_by(type) %>%
+  summarise(average = mean(price),
+            std = sd(price)) %>%
+  arrange(desc(average))
+
+df_2
+```
+
+(A) e5 has the biggest average price while diesel has the smallest average price.
+(B) The common belief is not correct. Actually, diesel prices vary more than regular gas (e5, e10).
+
+
+```{r}
+df_3 <- df %>%
+  group_by(type, wkday = weekdays(day)) %>%
+  summarise(average = mean(price)) %>%
+  arrange(type, average)
+
+df_3
+
+df_3diesel <- df_3 %>%
+  filter(type == 'diesel')
+
+df_3e10 <- df_3 %>%
+  filter(type == 'e10')
+
+df_3e5 <- df_3 %>%
+  filter(type == 'e5')
+
+print(paste0('For diesel, on average, it can save: ', max(df_3diesel$average) - min(df_3diesel$average)))
+print(paste0('For e10, on average, it can save: ', max(df_3e10$average) - min(df_3e10$average)))
+print(paste0('For e5, on average, it can save: ', max(df_3e5$average) - min(df_3e5$average)))
+```
+
+For diesel, on average, if you get gas on the cheapest day of the week versus the most expansive day of the week, it can save : 0.00381933391972833
+For e10, on average, if you get gas on the cheapest day of the week versus the most expansive day of the week, it can save: 0.00640470338381349
+For e5, on average, if you get gas on the cheapest day of the week versus the most expansive day of the week, it can save: 0.0062355997208885
+
+
+```{r}
+df_4 <- df %>%
+  group_by(type, hour) %>%
+  summarise(average = mean(price)) %>%
+  arrange(type, average)
+
+df_4
+
+df_4diesel <- df_4 %>%
+  filter(type == 'diesel')
+
+df_4e10 <- df_4 %>%
+  filter(type == 'e10')
+
+df_4e5 <- df_4 %>%
+  filter(type == 'e5')
+
+print(paste0('For diesel, on average, it can save: ', max(df_4diesel$average) - min(df_4diesel$average)))
+print(paste0('For e10, on average, it can save: ', max(df_4e10$average) - min(df_4e10$average)))
+print(paste0('For e5, on average, it can save: ', max(df_4e5$average) - min(df_4e5$average)))
+```
+
+For diesel, on average, if you get gas on the cheapest hour of the day versus the most expansive hour of the day, it can save : 0.0776999936388756
+For e10, on average, if you get gas on the cheapest hour of the day versus the most expansive hour of the day, it can save: 0.0813931731559123
+For e5, on average, if you get gas on the cheapest hour of the day versus the most expansive hour of the day, it can save: 0.0816852745505443
+
+
+```{r}
+dat <- read_csv("data/stations.csv")
+
+stations <- saveRDS(dat, "data/stations.rds")
+stations_new <- readRDS("data/stations.rds")
+
+df_5 <- df %>%
+  left_join(stations_new, by = 'station_uuid') %>%
+  group_by(type, brand) %>%
+  summarise(average = mean(price)) %>%
+  arrange(type, average)
+
+df_5diesel <- df_5 %>%
+  filter(type == 'diesel')
+
+df_5e10 <- df_5 %>%
+  filter(type == 'e10')
+
+df_5e5 <- df_5 %>%
+  filter(type == 'e5')
+
+head(df_5diesel, 3)
+tail(df_5diesel, 3)
+
+head(df_5e10, 3)
+tail(df_5e10, 3)
+
+head(df_5e5, 3)
+tail(df_5e5, 3)
+
+print(paste0('For diesel, on average, it can save: ', max(df_5diesel$average) - min(df_5diesel$average)))
+print(paste0('For e10, on average, it can save: ', max(df_5e10$average) - min(df_5e10$average)))
+print(paste0('For e5, on average, it can save: ', max(df_5e5$average) - min(df_5e5$average)))
+```
+
+For diesel, on average, by visiting the cheapest brand versus the most expensive brand, it can save : 0.178900317568814
+For e10, on average, by visiting the cheapest brand versus the most expensive brand: 0.193578466774771
+For e5, on average, by visiting the cheapest brand versus the most expensive brand, it can save: 0.176413974021148
+
+
+```{r}
+df_6 <- df %>%
+  left_join(stations_new, by = 'station_uuid') %>%
+  group_by(type, city) %>%
+  summarise(average = mean(price)) %>%
+  arrange(type, average)
+
+df_6diesel <- df_6 %>%
+  filter(type == 'diesel', city == 'BERLIN' | city == 'HAMBURG'| city == 'FRANKFURT' | city == 'BREMEN')
+
+df_6e10 <- df_6 %>%
+  filter(type == 'e10', city == 'BERLIN' | city == 'HAMBURG'| city == 'FRANKFURT' | city == 'BREMEN')
+
+df_6e5 <- df_6 %>%
+  filter(type == 'e5', city == 'BERLIN' | city == 'HAMBURG'| city == 'FRANKFURT' | city == 'BREMEN')
+
+df_6final <- rbind(df_6diesel, df_6e10, df_6e5) %>%
+  spread(type, average)
+```
+
